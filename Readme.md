@@ -18,7 +18,7 @@ func Middleware(next http.Handler) http.Handler {
 		rw := httpbuf.Wrap(w)
 		defer rw.Flush()
 		next.ServeHTTP(rw, r)
-		fmt.Println("captured", rw.Body.String())
+		fmt.Println("captured", string(rw.Body))
 	})
 }
 ```

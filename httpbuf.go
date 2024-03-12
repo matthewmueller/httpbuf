@@ -1,7 +1,6 @@
 package httpbuf
 
 import (
-	"bytes"
 	"net/http"
 
 	"github.com/felixge/httpsnoop"
@@ -9,7 +8,7 @@ import (
 
 func Wrap(w http.ResponseWriter) *ResponseWriter {
 	rw := &ResponseWriter{
-		Body:    new(bytes.Buffer),
+		Body:    []byte{},
 		Headers: w.Header().Clone(),
 		inner:   w,
 	}
@@ -32,7 +31,8 @@ func Wrap(w http.ResponseWriter) *ResponseWriter {
 		},
 		Write: func(_ httpsnoop.WriteFunc) httpsnoop.WriteFunc {
 			return func(b []byte) (int, error) {
-				return rw.Body.Write(b)
+				rw.Body = append(rw.Body, b...)
+				return len(b), nil
 			}
 		},
 		Flush: func(flush httpsnoop.FlushFunc) httpsnoop.FlushFunc {
@@ -47,11 +47,14 @@ func Wrap(w http.ResponseWriter) *ResponseWriter {
 type ResponseWriter struct {
 	http.ResponseWriter
 	Status  int
-	Body    *bytes.Buffer
+	Body    []byte
 	Headers http.Header
 	inner   http.ResponseWriter
 	wrote   bool
+	offset  int
 }
+
+var _ http.Flusher = (*ResponseWriter)(nil)
 
 func (rw *ResponseWriter) Flush() {
 	// Only write status code once to avoid: "http: superfluous
@@ -67,5 +70,6 @@ func (rw *ResponseWriter) Flush() {
 		rw.inner.WriteHeader(rw.Status)
 		rw.wrote = true
 	}
-	rw.Body.WriteTo(rw.inner)
+	n, _ := rw.inner.Write(rw.Body[rw.offset:])
+	rw.offset += n
 }

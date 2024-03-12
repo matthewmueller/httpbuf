@@ -1,6 +1,7 @@
 package httpbuf_test
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -140,7 +141,8 @@ func TestFlushWrapped(t *testing.T) {
 	is.Equal(rw.Status, 200)
 	is.Equal(rw.Headers.Get("X-A"), "A")
 	is.Equal(rw.Headers.Get("X-B"), "")
-	is.Equal(rw.Body.String(), "zzz")
+	fmt.Println(string(rw.Body))
+	is.Equal(string(rw.Body), "Hello, world!yoyozzz")
 	rw.Flush()
 	res := rec.Result()
 	is.Equal(res.StatusCode, 200)
