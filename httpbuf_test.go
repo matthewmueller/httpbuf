@@ -1,4 +1,4 @@
-package httpwrap_test
+package httpbuf_test
 
 import (
 	"io"
@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/livebud/httpwrap"
 	"github.com/matryer/is"
+	"github.com/matthewmueller/httpbuf"
 )
 
 func TestHeadersNormal(t *testing.T) {
@@ -37,7 +37,7 @@ func TestHeadersWrapped(t *testing.T) {
 		w.Write([]byte("Hello, world!"))
 		w.Header().Add("X-B", "B")
 	})
-	rw := httpwrap.Buffer(rec)
+	rw := httpbuf.Wrap(rec)
 	h.ServeHTTP(rw, req)
 	rw.Flush()
 	res := rec.Result()
@@ -78,7 +78,7 @@ func TestWriteStatusWrapped(t *testing.T) {
 		w.Write([]byte("Hello, world!"))
 		w.Header().Add("X-B", "B")
 	})
-	rw := httpwrap.Buffer(rec)
+	rw := httpbuf.Wrap(rec)
 	h.ServeHTTP(rw, req)
 	rw.Flush()
 	res := rec.Result()
@@ -106,7 +106,7 @@ func TestFlushNormal(t *testing.T) {
 		}
 		w.Header().Add("X-B", "B")
 	})
-	rw := httpwrap.Buffer(rec)
+	rw := httpbuf.Wrap(rec)
 	h.ServeHTTP(rw, req)
 	rw.Flush()
 	res := rec.Result()
@@ -135,7 +135,7 @@ func TestFlushWrapped(t *testing.T) {
 		}
 		w.Header().Add("X-B", "B")
 	})
-	rw := httpwrap.Buffer(rec)
+	rw := httpbuf.Wrap(rec)
 	h.ServeHTTP(rw, req)
 	is.Equal(rw.Status, 200)
 	is.Equal(rw.Headers.Get("X-A"), "A")
@@ -168,7 +168,7 @@ func TestFlushStatusWrapped(t *testing.T) {
 		}
 		w.Header().Add("X-B", "B")
 	})
-	rw := httpwrap.Buffer(rec)
+	rw := httpbuf.Wrap(rec)
 	h.ServeHTTP(rw, req)
 	rw.Flush()
 	res := rec.Result()
@@ -188,7 +188,7 @@ func TestMultipleWriteHeaders(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusSeeOther)
 	})
-	rw := httpwrap.Buffer(rec)
+	rw := httpbuf.Wrap(rec)
 	h.ServeHTTP(rw, req)
 	rw.Flush()
 	res := rec.Result()
@@ -196,7 +196,7 @@ func TestMultipleWriteHeaders(t *testing.T) {
 	req, err = http.NewRequest("POST", "/", nil)
 	is.NoErr(err)
 	rec = httptest.NewRecorder()
-	rw = httpwrap.Buffer(rec)
+	rw = httpbuf.Wrap(rec)
 	h.ServeHTTP(rw, req)
 	rw.Flush()
 	res = rec.Result()

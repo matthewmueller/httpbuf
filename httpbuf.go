@@ -1,4 +1,4 @@
-package httpwrap
+package httpbuf
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"github.com/felixge/httpsnoop"
 )
 
-func Buffer(w http.ResponseWriter) *ResponseWriter {
+func Wrap(w http.ResponseWriter) *ResponseWriter {
 	rw := &ResponseWriter{
 		Body:    new(bytes.Buffer),
 		Headers: w.Header().Clone(),

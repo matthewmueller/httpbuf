@@ -1,4 +1,4 @@
-module github.com/livebud/httpwrap
+module github.com/matthewmueller/httpbuf
 
 go 1.21.0
 
